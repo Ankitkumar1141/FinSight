@@ -1,0 +1,14 @@
+version: "3.9"
+
+services:
+  financial-rag:
+    build: .
+    container_name: financial-rag
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env                       # picks up MISTRAL_API_KEY
+    volumes:
+      - ./data:/app/data           # persist ChromaDB index and uploads
+      - ./logs:/app/logs           # persist logs
+    restart: unless-stopped

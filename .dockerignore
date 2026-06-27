@@ -1,0 +1,12 @@
+.env
+.git/
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+data/chroma_db/
+logs/
+*.log
+financial_rag_venv/
+financial_rag_venv
