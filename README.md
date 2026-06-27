@@ -1,3 +1,13 @@
+---
+title: FinSight
+emoji: 📊
+colorFrom: blue
+colorTo: indigo
+sdk: docker
+app_port: 7860
+short_description: AI-powered RAG system for financial document intelligence
+---
+
 # FinSight
 
 > A production-grade Retrieval-Augmented Generation (RAG) system engineered for deep financial document intelligence. Combines hybrid sparse-dense retrieval, cross-encoder re-ranking, and domain-aware prompt routing over SEC filings, earnings transcripts, and investor presentations.

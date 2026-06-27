@@ -17,9 +17,15 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy source
 COPY . .
 
-# Pre-create data dirs (volumes will override at runtime)
-RUN mkdir -p data/uploads data/chroma_db logs
+# HF Spaces runs containers as a non-root user (uid=1000, gid=1000)
+# Create user and fix permissions on writable dirs
+RUN useradd -m -u 1000 user && \
+    mkdir -p data/uploads data/chroma_db logs && \
+    chown -R user:user /app
 
-EXPOSE 8000
+USER user
+
+# HF Spaces mandatory port
+EXPOSE 7860
 
 CMD ["python", "main.py"]
