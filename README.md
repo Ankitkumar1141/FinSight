@@ -8,43 +8,43 @@
 
 ```
 ┌──────────────────────────────────────────────────────────────────────┐
-│                        CLIENT  (HTTP / REST)                          │
+│                        CLIENT  (HTTP / REST)                         │
 └───────────────────┬──────────────────────────┬───────────────────────┘
                     │                          │
              POST /upload                 POST /query
                     │                          │
 ┌───────────────────▼──────────────────────────▼───────────────────────┐
-│                      FastAPI  —  routes.py                            │
-│              /upload   /query   /documents   /health                  │
+│                      FastAPI  —  routes.py                           │
+│              /upload   /query   /documents   /health                 │
 └───────────────────┬──────────────────────────┬───────────────────────┘
                     │                          │
         ┌───────────▼────────┐     ┌───────────▼──────────────────────┐
-        │  INGESTION PIPELINE│     │         QUERY PIPELINE            │
-        │                    │     │                                    │
-        │  loader.py         │     │  embedder.py                      │
-        │  ─ PDF/DOCX/TXT    │     │  ─ Query → 384-dim vector         │
-        │  ─ Table extract   │     │                                    │
-        │  ─ Metadata tag    │     │  retriever.py                     │
-        │                    │     │  ┌─────────────┬───────────────┐  │
-        │  chunker.py        │     │  │ Vector      │ BM25 Keyword  │  │
-        │  ─ Section-aware   │     │  │ Search      │ Search        │  │
-        │  ─ 1000-char split │     │  │ (ChromaDB)  │ (rank-bm25)   │  │
-        │  ─ Overlap 200     │     │  └──────┬──────┴───────┬───────┘  │
-        │                    │     │         │               │          │
-        │  embedder.py       │     │         └──────┬────────┘          │
-        │  ─ all-MiniLM-L6   │     │                │                   │
-        │  ─ 384-dim vectors │     │     Reciprocal Rank Fusion (RRF)   │
-        │                    │     │                │                   │
-        │  vector_store.py   │     │     Cross-Encoder Re-ranking       │
-        │  ─ ChromaDB upsert │     │     (ms-marco-MiniLM-L-6-v2)      │
-        │  ─ Persist to disk │     │                │                   │
-        └────────────────────┘     │     prompt_templates.py            │
-                                   │     ─ Intent routing               │
-                 ┌─────────────────│─────  Risk / Revenue / Mgmt / Gen  │
-                 │  ChromaDB Index │                │                   │
-                 │  ./data/chroma  │     llm_client.py                  │
-                 └─────────────────┘     ─ Mistral mistral-small-latest │
-                                         ─ Cited structured response    │
+        │  INGESTION PIPELINE│     │         QUERY PIPELINE           │
+        │                    │     │                                  │
+        │  loader.py         │     │  embedder.py                     │
+        │  ─ PDF/DOCX/TXT    │     │  ─ Query → 384-dim vector        │
+        │  ─ Table extract   │     │                                  │
+        │  ─ Metadata tag    │     │  retriever.py                    │
+        │                    │     │  ┌─────────────┬───────────────┐ │
+        │  chunker.py        │     │  │ Vector      │ BM25 Keyword  │ │
+        │  ─ Section-aware   │     │  │ Search      │ Search        │ │
+        │  ─ 1000-char split │     │  │ (ChromaDB)  │ (rank-bm25)   │ │
+        │  ─ Overlap 200     │     │  └──────┬──────┴───────┬───────┘ │
+        │                    │     │         │               │        │
+        │  embedder.py       │     │         └──────┬────────┘        │
+        │  ─ all-MiniLM-L6   │     │                │                 │
+        │  ─ 384-dim vectors │     │     Reciprocal Rank Fusion (RRF) │
+        │                    │     │                │                 │
+        │  vector_store.py   │     │     Cross-Encoder Re-ranking     │
+        │  ─ ChromaDB upsert │     │     (ms-marco-MiniLM-L-6-v2)     │
+        │  ─ Persist to disk │     │                │                 │
+        └────────────────────┘     │     prompt_templates.py          │
+                                   │     ─ Intent routing             │
+                 ┌─────────────────│─────  Risk / Revenue / Mgmt / Gen│
+                 │  ChromaDB Index │                │                 │
+                 │  ./data/chroma  │     llm_client.py                │
+                 └─────────────────┘     ─ Mistral mistral-small-2603 │
+                                         ─ Cited structured response  │
                                    └──────────────────────────────────┘
 ```
 
