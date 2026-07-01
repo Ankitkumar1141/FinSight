@@ -66,7 +66,13 @@ class VectorStore:
             "include": ["documents", "metadatas", "distances"],
         }
         if where:
-            kwargs["where"] = where
+            # ChromaDB 0.4+ requires explicit operator syntax for where filters.
+            # Wrap each value in {"$eq": value} and combine multiple filters with $and.
+            chroma_where = {k: {"$eq": v} for k, v in where.items()}
+            if len(chroma_where) > 1:
+                kwargs["where"] = {"$and": [{k: v} for k, v in chroma_where.items()]}
+            else:
+                kwargs["where"] = chroma_where
 
         results = self.collection.query(**kwargs)
 
@@ -95,7 +101,7 @@ class VectorStore:
 
     def delete_by_source(self, source_name: str) -> int:
         results = self.collection.get(
-            where={"source": source_name},
+            where={"source": {"$eq": source_name}},
             include=["documents"],
         )
         ids = results["ids"]
@@ -113,7 +119,7 @@ class VectorStore:
 
     def get_metadata_for_source(self, source: str) -> Dict[str, Any]:
         results = self.collection.get(
-            where={"source": source},
+            where={"source": {"$eq": source}},
             limit=1,
             include=["metadatas"],
         )
