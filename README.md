@@ -121,7 +121,7 @@ Incoming queries are classified and dispatched to domain-specific prompt templat
 
 ## API Reference
 
-**Base URL:** `http://localhost:8000/api/v1`  
+**Base URL:** `http://localhost:7860/api/v1` (or `http://127.0.0.1:7860/api/v1` — note: the host is bound to `0.0.0.0`, but you must use `localhost` or `127.0.0.1` to access it in web browsers)  
 **Interactive docs:** `/docs` (Swagger UI) · `/redoc` (ReDoc)
 
 ### `POST /upload`
@@ -247,6 +247,7 @@ llm:
 │   ├── prompts/prompt_templates.py
 │   ├── llm/llm_client.py
 │   ├── api/routes.py
+│   ├── ui/app.py
 │   └── utils/helpers.py
 ├── tests/
 │   └── test_app.py
@@ -256,6 +257,29 @@ llm:
 └── logs/
     └── app.log
 ```
+
+---
+
+## Streamlit Frontend
+
+A new Streamlit interface is available at `src/ui/app.py`.
+
+Run the backend first with:
+
+```bash
+python main.py
+```
+
+Then start the Streamlit UI with:
+
+```bash
+streamlit run src/ui/app.py
+```
+
+The frontend supports:
+- document upload via the existing `POST /api/v1/upload` endpoint
+- question answering via the existing `POST /api/v1/query` endpoint
+- index health and document metadata inspection via `/api/v1/health` and `/api/v1/documents`
 
 ---
 
