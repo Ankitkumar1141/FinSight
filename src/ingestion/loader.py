@@ -123,6 +123,18 @@ def load_docx(file_path: str) -> List[Dict[str, Any]]:
     paragraphs = [p.text for p in doc.paragraphs if p.text.strip()]
     content = "\n\n".join(paragraphs)
 
+    # Also extract tables — financial .docx files often store key data in tables
+    table_lines = []
+    for table in doc.tables:
+        for row in table.rows:
+            row_text = " | ".join(
+                cell.text.strip() for cell in row.cells if cell.text.strip()
+            )
+            if row_text:
+                table_lines.append(row_text)
+    if table_lines:
+        content += "\n\n[TABLE DATA]\n" + "\n".join(table_lines)
+
     filename = Path(file_path).name
     doc_type = detect_doc_type(filename, content[:500])
     year = extract_year(content[:1000])
