@@ -195,14 +195,16 @@ embedding:
   batch_size: 32
 
 chunking:
-  chunk_size: 1000                # characters per chunk
-  chunk_overlap: 200
+  breakpoint_percentile: 85.0    # cosine-distance percentile that marks a topic boundary
+  min_chunk_size: 100            # chars — smaller chunks are merged into neighbour
+  max_chunk_size: 2000           # chars — oversized chunks are sentence-split further
+  buffer_size: 1                 # sentences on each side included in the embedding window
 
 retrieval:
-  top_k: 10                       # candidates before re-ranking
-  bm25_weight: 0.4                # RRF weight for sparse retrieval
-  vector_weight: 0.6              # RRF weight for dense retrieval
-  rerank_top_k: 5                 # final chunks sent to LLM
+  top_k: 10                      # candidates before re-ranking
+  bm25_weight: 0.4               # RRF weight for sparse retrieval
+  vector_weight: 0.6             # RRF weight for dense retrieval
+  rerank_top_k: 5                # final chunks sent to LLM
   reranker_model: "cross-encoder/ms-marco-MiniLM-L-6-v2"
 
 llm:
