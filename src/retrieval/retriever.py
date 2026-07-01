@@ -37,6 +37,12 @@ class HybridRetriever:
     # ------------------------------------------------------------------ #
 
     def _rebuild_bm25(self):
+        # Only rebuild when the number of stored documents has changed.
+        # This avoids fetching all docs from ChromaDB on every single query.
+        current_count = self.vector_store.count()
+        if current_count == len(self._bm25_docs):
+            return  # Index is still current — nothing to do
+
         docs = self.vector_store.get_all_documents()
         self._bm25_docs = docs
         if not docs:
@@ -45,7 +51,7 @@ class HybridRetriever:
         from rank_bm25 import BM25Okapi
         tokenized = [d["content"].lower().split() for d in docs]
         self._bm25 = BM25Okapi(tokenized)
-        logger.debug(f"BM25 index built with {len(docs)} docs")
+        logger.debug(f"BM25 index rebuilt with {len(docs)} docs")
 
     def _bm25_search(self, query: str, top_k: int) -> List[Dict[str, Any]]:
         if self._bm25 is None or len(self._bm25_docs) == 0:
