@@ -1,12 +1,32 @@
+# Secrets
 .env
+
+# Git
 .git/
+.gitignore
+
+# Python virtualenvs & caches
 .venv/
 venv/
+env/
+financial_rag_venv/
+financial_rag_venv
 __pycache__/
 *.pyc
 *.pyo
+*.pyd
+.pytest_cache/
+
+# Runtime data — mounted as Docker volumes, never baked into the image
 data/chroma_db/
+data/uploads/
 logs/
 *.log
-financial_rag_venv/
-financial_rag_venv
+
+# Dev / documentation files — not needed at runtime
+*.docx
+*.md
+README*
+tests/
+.vscode/
+.idea/
