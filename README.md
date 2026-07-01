@@ -283,19 +283,94 @@ The frontend supports:
 
 ---
 
+## Local URLs (when running locally)
+
+| Service | URL | Notes |
+|---|---|---|
+| **FastAPI Backend** | http://localhost:7860 | API entrypoint |
+| **Swagger UI (API docs)** | http://localhost:7860/docs | Interactive API explorer |
+| **ReDoc** | http://localhost:7860/redoc | Alternative API reference |
+| **Health Check** | http://localhost:7860/api/v1/health | Index statistics |
+| **Streamlit UI** | http://localhost:8501 | Document upload & Q&A frontend |
+
+> **Note:** The backend binds to `0.0.0.0:7860` to support Docker and HF Spaces.  
+> In your **browser**, always use `localhost` or `127.0.0.1` — not `0.0.0.0`.
+
+---
+
 ## Setup
 
+### Option 1 — Local Python (recommended for development)
+
 ```bash
-# 1. Clone and install
+# 1. Clone the repo
+git clone <your-repo-url>
+cd financial-rag
+
+# 2. Create and activate a virtual environment
+python -m venv .venv
+# Windows:
+.venv\Scripts\activate
+# Mac/Linux:
+source .venv/bin/activate
+
+# 3. Install dependencies
 pip install -r requirements.txt
 
-# 2. Configure credentials
-echo "MISTRAL_API_KEY=your_mistral_key_here" > .env
+# 4. Configure credentials — copy the template and fill in your key
+copy .env.example .env          # Windows
+# cp .env.example .env          # Mac/Linux
+# Then edit .env and set:  MISTRAL_API_KEY=your_key_here
+# Get your key at: https://console.mistral.ai → API Keys
 
-# 3. Run
-python main.py                    # local
-docker-compose up -d              # docker
+# 5. Start the backend (loads models on first run, ~30 s)
+python main.py
+# Backend is live at: http://localhost:7860
+# Swagger UI at:      http://localhost:7860/docs
+
+# 6. (Optional) Start the Streamlit frontend in a second terminal
+streamlit run src/ui/app.py
+# Frontend is live at: http://localhost:8501
 ```
+
+### Option 2 — Docker (recommended for deployment)
+
+```bash
+# 1. Ensure Docker Desktop is running
+
+# 2. Configure credentials
+copy .env.example .env          # Windows
+# cp .env.example .env          # Mac/Linux
+# Edit .env and set MISTRAL_API_KEY=your_key_here
+
+# 3. Build the image (~5 min first time, uses CPU-only PyTorch)
+docker-compose build
+
+# 4. Start the container (detached)
+docker-compose up -d
+
+# 5. Check it is running
+docker-compose logs -f
+# Backend live at: http://localhost:7860
+# Swagger UI at:   http://localhost:7860/docs
+
+# Useful commands
+docker-compose down               # Stop the container
+docker-compose up -d --build      # Rebuild + restart after code changes
+docker exec -it financial-rag bash  # Shell into the running container
+```
+
+> **Data persistence:** `./data/` and `./logs/` are mounted as Docker volumes.  
+> Your ChromaDB index and uploaded documents survive container restarts and rebuilds.
+
+### Option 3 — Hugging Face Spaces
+
+This repo is pre-configured for HF Spaces Docker deployment (`sdk: docker`, `app_port: 7860` in the README YAML frontmatter):
+
+1. Push this repo to a Hugging Face Space (Docker SDK).
+2. Add `MISTRAL_API_KEY` as a **Space secret** (Settings → Variables and secrets).
+3. HF Spaces automatically builds the Docker image and runs `python main.py`.
+4. The API is available at your Space's public URL.
 
 ---
 
