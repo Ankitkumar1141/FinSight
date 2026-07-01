@@ -166,7 +166,12 @@ def main() -> None:
                         st.write("**Chunks created:**", result.get("chunks_created"))
                         st.write("**Document type:**", result.get("doc_type"))
                         st.write("**Year:**", result.get("year"))
-                        st.info("Use the Refresh button below to reload index status and document metadata.")
+                        # Auto-refresh so the sidebar count updates immediately
+                        health, documents = refresh_index_data(api_url)
+                        st.sidebar.write(
+                            f"**Index:** {health.get('total_chunks', 0)} chunks across {health.get('total_sources', 0)} sources"
+                        )
+                        st.info("Index status has been refreshed automatically.")
                     except Exception as exc:
                         st.error("Upload failed.")
                         st.exception(exc)
