@@ -144,7 +144,13 @@ def main() -> None:
                         st.markdown("### Answer")
                         st.markdown(response.get("answer", "_No answer returned._"))
                         st.markdown("### Sources")
-                        render_source_table(response.get("sources", []))
+                        if stream:
+                            st.info(
+                                "Source citations are not available in streaming mode. "
+                                "Uncheck 'Stream response' to see cited sources."
+                            )
+                        else:
+                            render_source_table(response.get("sources", []))
                     except Exception as exc:
                         st.error("Query failed.")
                         st.exception(exc)
