@@ -1,0 +1,8 @@
+[server]
+# Disable XSRF protection — required on Hugging Face Spaces because HF's
+# reverse proxy strips the XSRF token from file-upload requests, causing
+# Streamlit 1.57+ (Starlette-based server) to return 403 on st.file_uploader.
+enableXsrfProtection = false
+
+# Headless mode — suppress the browser-open prompt in the container
+headless = true

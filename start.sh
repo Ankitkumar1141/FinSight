@@ -23,7 +23,7 @@ for i in $(seq 1 30); do
 done
 
 # ── Start Streamlit frontend on port 7860 (foreground) ────────────────────────
+# Note: headless + enableXsrfProtection=false are set in .streamlit/config.toml
 exec streamlit run src/ui/app.py \
     --server.port 7860 \
-    --server.address 0.0.0.0 \
-    --server.headless true
+    --server.address 0.0.0.0
