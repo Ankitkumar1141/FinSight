@@ -71,7 +71,15 @@ def query_documents(
             return {"query": query_text, "answer": answer, "sources": []}
         else:
             response = client.post(f"{api_url}/query", json=payload)
-            response.raise_for_status()
+            try:
+                response.raise_for_status()
+            except httpx.HTTPStatusError as e:
+                # Retrieve backend's exception detail if available
+                try:
+                    error_detail = response.json().get("detail", response.text)
+                except Exception:
+                    error_detail = response.text
+                raise RuntimeError(f"Backend Error ({response.status_code}): {error_detail}") from e
             return response.json()
 
 
