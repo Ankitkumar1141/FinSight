@@ -1,7 +1,7 @@
 import httpx
 import streamlit as st
 
-DEFAULT_API_URL = "http://localhost:7860/api/v1"
+DEFAULT_API_URL = "http://localhost:8008/api/v1"
 SUPPORTED_EXTENSIONS = [".pdf", ".txt", ".docx", ".md"]
 
 
