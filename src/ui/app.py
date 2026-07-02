@@ -32,7 +32,7 @@ def fetch_documents(api_url: str) -> list:
 
 
 def upload_document(api_url: str, uploaded_file: st.runtime.uploaded_file_manager.UploadedFile) -> dict:
-    with httpx.Client(timeout=120.0) as client:
+    with httpx.Client(timeout=600.0) as client:  # 10 min — semantic chunking on CPU is slow
         files = {
             "file": (
                 uploaded_file.name,
@@ -164,7 +164,10 @@ def main() -> None:
         if uploaded_file is not None:
             st.write(f"Selected file: {uploaded_file.name}")
             if st.button("Upload to FinSight"):
-                with st.spinner("Uploading and indexing document..."):
+                with st.spinner(
+                    "Uploading and indexing document — this may take **several minutes** "
+                    "for large PDFs (semantic chunking + embedding on CPU). Please wait…"
+                ):
                     try:
                         result = upload_document(api_url, uploaded_file)
                         st.success(result.get("message", "Upload completed."))

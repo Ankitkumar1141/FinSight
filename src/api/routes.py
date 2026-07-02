@@ -84,6 +84,8 @@ def create_router(
 
     @router.post("/upload", response_model=UploadResponse, tags=["Documents"])
     async def upload_document(file: UploadFile = File(...)):
+        import asyncio
+
         ext = Path(file.filename).suffix.lower()
         if ext not in ALLOWED_EXTENSIONS:
             raise HTTPException(
@@ -97,15 +99,14 @@ def create_router(
         with open(dest, "wb") as f:
             shutil.copyfileobj(file.file, f)
 
-        try:
+        def _process() -> UploadResponse:
+            """CPU-bound processing — runs in a thread pool to avoid blocking uvicorn."""
             pages = load_document(dest)
             chunks = chunker.chunk_documents(pages)
             if not chunks:
                 raise ValueError("No text content could be extracted from the file.")
-
             embeddings = embedder.embed([c["content"] for c in chunks])
             vector_store.add_chunks(chunks, embeddings)
-
             sample_meta = chunks[0]["metadata"]
             return UploadResponse(
                 message="Document successfully uploaded and indexed.",
@@ -114,9 +115,23 @@ def create_router(
                 doc_type=sample_meta.get("doc_type", "unknown"),
                 year=sample_meta.get("year", "unknown"),
             )
+
+        try:
+            # Allow up to 8 minutes for large PDFs on CPU
+            result = await asyncio.wait_for(
+                asyncio.to_thread(_process),
+                timeout=480,
+            )
+            return result
+        except asyncio.TimeoutError:
+            raise HTTPException(
+                status_code=504,
+                detail="Processing timed out (>8 min). Try a smaller file or split the PDF.",
+            )
         except Exception as exc:
             logger.error(f"Failed to process '{file.filename}': {exc}", exc_info=True)
             raise HTTPException(status_code=500, detail=str(exc))
+
 
     # ---- Query ----------------------------------------------------- #
 
