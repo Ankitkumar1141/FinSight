@@ -61,11 +61,19 @@ def query_documents(
         "stream": stream,
     }
     with httpx.Client(timeout=120.0) as client:
-        response = client.post(f"{api_url}/query", json=payload)
-        response.raise_for_status()
         if stream:
-            return {"query": query_text, "answer": response.text, "sources": []}
-        return response.json()
+            # FastAPI returns Transfer-Encoding: chunked for streaming responses.
+            # Must use httpx's stream() context manager — a plain .post() call
+            # cannot consume chunked encoding and raises RemoteProtocolError.
+            with client.stream("POST", f"{api_url}/query", json=payload) as response:
+                response.raise_for_status()
+                answer = "".join(response.iter_text())
+            return {"query": query_text, "answer": answer, "sources": []}
+        else:
+            response = client.post(f"{api_url}/query", json=payload)
+            response.raise_for_status()
+            return response.json()
+
 
 
 def refresh_index_data(api_url: str):
@@ -95,7 +103,7 @@ def render_source_table(sources: list) -> None:
 
 def main() -> None:
     st.set_page_config(page_title="FinSight UI", page_icon="📊", layout="wide")
-    st.title("FinSight Streamlit Frontend")
+    st.title("FinSight")
     st.write(
         "This UI connects to the FinSight FastAPI backend and provides document upload, query, and index inspection capabilities."
     )
