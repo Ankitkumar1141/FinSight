@@ -30,6 +30,9 @@ RUN apt-get purge -y --auto-remove gcc g++ libpoppler-cpp-dev \
 # ── Source code ────────────────────────────────────────────────────────────────
 COPY . .
 
+# ── Make startup script executable ────────────────────────────────────────────
+RUN chmod +x start.sh
+
 # ── Non-root user (required by Hugging Face Spaces) ────────────────────────────
 RUN useradd -m -u 1000 user && \
     mkdir -p data/uploads data/chroma_db logs && \
@@ -40,4 +43,5 @@ USER user
 # HF Spaces mandatory port
 EXPOSE 7860
 
-CMD ["python", "main.py"]
+# Launch FastAPI (port 8008, background) then Streamlit (port 7860, foreground)
+CMD ["./start.sh"]
